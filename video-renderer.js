@@ -115,7 +115,11 @@
 
   async function renderVideo(){
     var script=window.clipforgeLastScript;
-    if(!script||!script.body){alert('Erst ein KI-Skript erstellen.');return;}
+    if(!script||!script.body){
+      var missing=document.getElementById('buildResult');
+      if(missing){missing.classList.remove('hidden');missing.innerHTML='<b>⚠️ Kein Skript vorhanden</b><br><span>Erstelle zuerst ein KI-Skript.</span>';}
+      return;
+    }
     var scenes=sceneList(script);
     var btn=document.getElementById('renderVideoBtn'),wrap=document.getElementById('videoPreviewWrap'),video=document.getElementById('videoPreview'),download=document.getElementById('downloadVideoBtn'),demo=document.getElementById('demoPhone'),hint=document.getElementById('previewHint');
     if(btn){btn.disabled=true;btn.textContent='⏳ KI-Stimme wird erstellt…';}
