@@ -44,7 +44,7 @@ async function mistralChat(messages) {
         'Authorization': 'Bearer ' + process.env.MISTRAL_API_KEY
       },
       body: JSON.stringify({
-        model: 'mistral-small-latest',
+        model: 'ministral-3b-2512',
         messages,
         temperature: 0.8,
         response_format: { type: 'json_object' }
