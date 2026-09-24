@@ -91,14 +91,14 @@ app.post('/api/generate', async (req, res) => {
     if (type === 'idea') {
       const result = await mistralChat([
         { role: 'system', content: 'Du bist ClipForge AI, ein kreativer Kurzvideo-Assistent. Erstelle sichere, jugendgeeignete TikTok-Ideen auf Deutsch. Keine gefährlichen Challenges, keine illegalen Anleitungen und keine sexualisierten Inhalte. Gib ausschließlich valides JSON zurück.' },
-        { role: 'user', content: 'Nische/Thema: ' + cleanTopic + '\nGib genau ein JSON-Objekt zurück: {"title":"...","hook":"...","duration":"..."}.\nDie Idee soll konkret, modern und in 30-45 Sekunden umsetzbar sein.' }
+        { role: 'user', content: 'Nische/Thema: ' + cleanTopic + '\nGib genau ein JSON-Objekt zurück: {"title":"...","hook":"...","duration":"..."}.\nDie Idee soll konkret, modern und in 30-45 Sekunden umsetzbar sein. Verwende für aktuelle Beispiele und Jahreszahlen 2026, nicht 2024.' }
       ]);
       return res.json(result);
     }
 
     const result = await mistralChat([
-      { role: 'system', content: 'Du bist ClipForge AI und schreibst kurze, natürliche deutsche TikTok-Skripte. Zielgruppe: allgemeines Publikum, jugendgeeignet. Keine gefährlichen Challenges, keine illegalen Anleitungen und keine sexualisierten Inhalte. Schreibe verständlich und mit starkem Hook. Gib ausschließlich valides JSON zurück.' },
-      { role: 'user', content: 'Thema: ' + cleanTopic + '\nStil: ' + String(style).slice(0, 100) + '\nGib genau ein JSON-Objekt zurück: {"hook":"...","body":"...","cta":"..."}.\nBody für etwa 30-45 Sekunden, mit kurzen Sätzen und sinnvollen Zeilenumbrüchen.' }
+      { role: 'system', content: 'Du bist ClipForge AI und schreibst kurze, natürliche deutsche TikTok-Skripte. Das aktuelle Jahr ist 2026. Zielgruppe: allgemeines Publikum, jugendgeeignet. Keine gefährlichen Challenges, keine illegalen Anleitungen und keine sexualisierten Inhalte. Schreibe verständlich und mit starkem Hook. Gib ausschließlich valides JSON zurück.' },
+      { role: 'user', content: 'Thema: ' + cleanTopic + '\nStil: ' + String(style).slice(0, 100) + '\nGib genau ein JSON-Objekt zurück: {"hook":"...","body":"...","cta":"..."}.\nBody für etwa 30-45 Sekunden, mit kurzen Sätzen und sinnvollen Zeilenumbrüchen. Verwende aktuelle Jahreszahlen und Bezüge auf 2026.' }
     ]);
     return res.json(result);
   } catch (error) {
