@@ -34,32 +34,48 @@ app.get('/health', (req, res) => res.json({
 }));
 
 async function mistralChat(messages) {
-  const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + process.env.MISTRAL_API_KEY
-    },
-    body: JSON.stringify({
-      model: 'mistral-small-latest',
-      messages,
-      temperature: 0.8,
-      response_format: { type: 'json_object' }
-    })
-  });
+  const maxAttempts = 3;
 
-  const raw = await response.text();
-  let data;
-  try { data = JSON.parse(raw); } catch { data = { raw }; }
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + process.env.MISTRAL_API_KEY
+      },
+      body: JSON.stringify({
+        model: 'mistral-small-latest',
+        messages,
+        temperature: 0.8,
+        response_format: { type: 'json_object' }
+      })
+    });
 
-  if (!response.ok) {
+    const raw = await response.text();
+    let data;
+    try { data = JSON.parse(raw); } catch { data = { raw }; }
+
+    if (response.ok) {
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) throw new Error('Mistral hat keine Antwort zurückgegeben');
+      return JSON.parse(content);
+    }
+
     const message = data?.message || data?.error?.message || data?.error || ('Mistral API HTTP ' + response.status);
-    throw new Error(String(message));
+
+    if (response.status !== 429 || attempt === maxAttempts) {
+      throw new Error(String(message));
+    }
+
+    const retryAfter = Number(response.headers.get('retry-after'));
+    const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+      ? Math.min(retryAfter * 1000, 30000)
+      : attempt * 2000;
+
+    await new Promise(resolve => setTimeout(resolve, waitMs));
   }
 
-  const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error('Mistral hat keine Antwort zurückgegeben');
-  return JSON.parse(content);
+  throw new Error('Mistral-Anfrage konnte nicht abgeschlossen werden');
 }
 
 app.post('/api/generate', async (req, res) => {
