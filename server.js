@@ -5,11 +5,22 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const app = express();
+const allowedOrigins = String(process.env.ALLOWED_ORIGINS || '*').split(',').map(v=>v.trim()).filter(Boolean);
+app.use((req,res,next)=>{
+  const origin=req.headers.origin;
+  if(allowedOrigins.includes('*') || (origin && allowedOrigins.includes(origin))) res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  res.setHeader('Access-Control-Allow-Headers','Content-Type');
+  res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');
+  if(req.method==='OPTIONS') return res.sendStatus(204);
+  next();
+});
 const port = process.env.PORT || 3000;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json({limit:'1mb'}));
 app.use(express.static(__dirname));
+
+app.get('/health',(req,res)=>res.json({ok:true,service:'ClipForge AI'}));
 
 app.post('/api/generate', async (req,res) => {
   if (!process.env.OPENAI_API_KEY) {
@@ -51,4 +62,4 @@ Body für etwa 30-45 Sekunden, mit kurzen Sätzen und sinnvollen Zeilenumbrüche
   }
 });
 
-app.listen(port,()=>console.log(`ClipForge läuft auf http://localhost:${port}`));
+app.listen(port,'0.0.0.0',()=>console.log(`ClipForge läuft auf port ${port}`));
