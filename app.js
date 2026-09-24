@@ -1,5 +1,5 @@
 const API_BASE = (window.CLIPFORGE_API_URL || localStorage.getItem('clipforge_api_url') || 'https://desktop-tutorial-bkh1.onrender.com').replace(/\/$/,'');
-const API_ENDPOINT = `${API_BASE}/api/generate`;
+const API_ENDPOINT = API_BASE + '/api/generate';
 
 const views=[...document.querySelectorAll('.view')];
 const nav=[...document.querySelectorAll('.nav-item[data-view]')];
@@ -8,8 +8,12 @@ document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=
 nav.forEach(n=>n.addEventListener('click',()=>showView(n.dataset.view)));
 
 function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
-
 const toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)};
+
+async function apiError(response){
+  const err=await response.json().catch(()=>({}));
+  return new Error(err.error || ('API-Fehler ' + response.status));
+}
 
 document.getElementById('ideaBtn').addEventListener('click', async () => {
   const input=document.getElementById('ideaInput');
@@ -19,7 +23,7 @@ document.getElementById('ideaBtn').addEventListener('click', async () => {
   result.innerHTML='<span>⏳ KI erstellt gerade eine Idee …</span>';
   try {
     const response=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'idea',topic})});
-    if(!response.ok){ const err=await response.json().catch(()=>({})); throw new Error(err.error||`API-Fehler ${response.status}`); }
+    if(!response.ok) throw await apiError(response);
     const data=await response.json();
     result.innerHTML='<b>✨ KI-Idee:</b> '+escapeHtml(data.title)+'<br><span>'+escapeHtml(data.hook)+' · '+escapeHtml(data.duration||'30–45 Sek.')+'</span>';
     toast('KI-Idee erstellt');
@@ -36,7 +40,7 @@ document.getElementById('buildBtn').addEventListener('click', async () => {
   result.innerHTML='<span>⏳ KI schreibt dein Skript …</span>';
   try {
     const response=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'script',topic,style:document.querySelector('.form-panel select')?.value||'Fast & energetic'})});
-    if(!response.ok) throw new Error('API nicht erreichbar');
+    if(!response.ok) throw await apiError(response);
     const data=await response.json();
     result.innerHTML='<b>HOOK</b><br>'+escapeHtml(data.hook)+'<br><br><b>BODY</b><br>'+escapeHtml(data.body).replace(/\n/g,'<br>')+'<br><br><b>CTA</b><br>'+escapeHtml(data.cta);
     toast('KI-Skript erstellt');
@@ -57,9 +61,7 @@ if(days){
  for(let i=1;i<=30;i++){const d=document.createElement('div');d.innerHTML='<span>'+i+'</span>'+(events[i]?'<span class="day-event">'+events[i]+'</span>':'');days.appendChild(d);}
 }
 
-/* --- ClipForge UX layer --- */
 const STORAGE_KEY='clipforge-projects-v1';
-
 function saveProject(){
   const title=(document.getElementById('topic')?.value||'').trim();
   if(!title){ toast('Bitte zuerst ein Thema eingeben'); return; }
@@ -82,22 +84,24 @@ if(buildButton){
 document.querySelectorAll('.primary').forEach(button=>{
   if(button.dataset.go==='create') return;
   button.addEventListener('click',()=>{
-    if(/automation|automatisierung/i.test(button.textContent)){
-      toast('Automatisierungs-Editor wird vorbereitet');
-    }
+    if(/automation|automatisierung/i.test(button.textContent)) toast('Automatisierungs-Editor wird vorbereitet');
   });
 });
 
-
-// Live backend status
 async function checkApiStatus(){
   const el=document.getElementById('apiStatus');
   if(!el) return;
   try{
-    const response=await fetch(`${API_BASE}/health`,{cache:'no-store'});
+    const response=await fetch(API_BASE + '/health',{cache:'no-store'});
     if(!response.ok) throw new Error('offline');
-    el.className='api-status online';
-    el.innerHTML='<span></span> KI verbunden';
+    const data=await response.json();
+    if(data.configured){
+      el.className='api-status online';
+      el.innerHTML='<span></span> KI verbunden';
+    }else{
+      el.className='api-status offline';
+      el.innerHTML='<span></span> KI-Key fehlt';
+    }
   }catch{
     el.className='api-status offline';
     el.innerHTML='<span></span> KI offline';
