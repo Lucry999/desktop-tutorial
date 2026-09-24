@@ -5,10 +5,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const app = express();
-const allowedOrigins = String(process.env.ALLOWED_ORIGINS || '*').split(',').map(v=>v.trim()).filter(Boolean);
+const allowedOrigins = String(process.env.ALLOWED_ORIGINS || 'https://lucry999.github.io,http://localhost:3000,http://127.0.0.1:3000').split(',').map(v=>v.trim().replace(/\/$/,'')).filter(Boolean);
 app.use((req,res,next)=>{
   const origin=req.headers.origin;
-  if(allowedOrigins.includes('*') || (origin && allowedOrigins.includes(origin))) res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  const normalizedOrigin=origin ? origin.replace(/\/$/,'') : '';
+  const githubPagesOrigin=/^https:\/\/([a-z0-9-]+)\.github\.io$/i.test(normalizedOrigin);
+  if(allowedOrigins.includes('*') || (normalizedOrigin && (allowedOrigins.includes(normalizedOrigin) || githubPagesOrigin))) res.setHeader('Access-Control-Allow-Origin', origin || '*');
+  if(origin) res.setHeader('Vary','Origin');
   res.setHeader('Access-Control-Allow-Headers','Content-Type');
   res.setHeader('Access-Control-Allow-Methods','GET,POST,OPTIONS');
   if(req.method==='OPTIONS') return res.sendStatus(204);
@@ -20,7 +23,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 app.use(express.json({limit:'1mb'}));
 app.use(express.static(__dirname));
 
-app.get('/health',(req,res)=>res.json({ok:true,service:'ClipForge AI'}));
+app.get('/health',(req,res)=>res.json({ok:true,service:'ClipForge AI',version:'1.1.0',time:new Date().toISOString()}));
 
 app.post('/api/generate', async (req,res) => {
   if (!process.env.OPENAI_API_KEY) {
