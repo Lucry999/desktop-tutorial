@@ -7,7 +7,14 @@ function showView(id){views.forEach(v=>v.classList.toggle('active',v.id===id));n
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.go)));
 nav.forEach(n=>n.addEventListener('click',()=>showView(n.dataset.view)));
 
-function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function escapeHtml(value){return String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function normalizeText(value){
+  if(value==null) return '';
+  if(typeof value==='string') return value;
+  if(Array.isArray(value)) return value.map(normalizeText).filter(Boolean).join('\n');
+  if(typeof value==='object') return value.text || value.content || value.value || Object.values(value).map(normalizeText).filter(Boolean).join('\n');
+  return String(value);
+}
 const toast=(msg)=>{const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)};
 
 async function apiError(response){
@@ -42,7 +49,10 @@ document.getElementById('buildBtn').addEventListener('click', async () => {
     const response=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'script',topic,style:document.querySelector('.form-panel select')?.value||'Fast & energetic'})});
     if(!response.ok) throw await apiError(response);
     const data=await response.json();
-    result.innerHTML='<b>HOOK</b><br>'+escapeHtml(data.hook)+'<br><br><b>BODY</b><br>'+escapeHtml(data.body).replace(/\n/g,'<br>')+'<br><br><b>CTA</b><br>'+escapeHtml(data.cta);
+    const hook=normalizeText(data.hook);
+    const body=normalizeText(data.body);
+    const cta=normalizeText(data.cta);
+    result.innerHTML='<b>HOOK</b><br>'+escapeHtml(hook)+'<br><br><b>BODY</b><br>'+escapeHtml(body).replace(/\n/g,'<br>')+'<br><br><b>CTA</b><br>'+escapeHtml(cta);
     toast('KI-Skript erstellt');
   } catch(error) {
     result.innerHTML='<b>⚠️ KI-Fehler</b><br><span>'+escapeHtml(error.message||'Backend nicht erreichbar')+'</span>';
