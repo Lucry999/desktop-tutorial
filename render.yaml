@@ -8,7 +8,5 @@ services:
     envVars:
       - key: MISTRAL_API_KEY
         sync: false
-      - key: RUNWAYML_API_SECRET
-        sync: false
       - key: ALLOWED_ORIGINS
         sync: false
