@@ -14,20 +14,20 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand"><span class="brand-mark">✦</span><span>ClipForge</span><span class="ai">AI</span></div>
-      <div class="workspace"><div class="avatar">L</div><div><strong>My Studio</strong><small>Creator workspace</small></div><span>⌄</span></div>
+      <div class="workspace"><div class="avatar">L</div><div><strong>My Studio</strong><small>Creator-Arbeitsbereich</small></div><span>⌄</span></div>
       <nav>
-        <p class="nav-label">WORKSPACE</p>
-        <button class="nav-item active" data-view="overview">⌂ <span>Overview</span></button>
-        <button class="nav-item" data-view="create">✦ <span>Create video</span></button>
-        <button class="nav-item" data-view="calendar">◷ <span>Content calendar</span></button>
-        <button class="nav-item" data-view="library">▣ <span>Video library</span></button>
-        <p class="nav-label">AUTOMATION</p>
-        <button class="nav-item" data-view="automations">⚡ <span>Automations</span><b class="pill">3</b></button>
-        <button class="nav-item" data-view="analytics">↗ <span>Analytics</span></button>
+        <p class="nav-label">ARBEITSBEREICH</p>
+        <button class="nav-item active" data-view="overview">⌂ <span>Übersicht</span></button>
+        <button class="nav-item" data-view="create">✦ <span>Video erstellen</span></button>
+        <button class="nav-item" data-view="calendar">◷ <span>Content-Kalender</span></button>
+        <button class="nav-item" data-view="library">▣ <span>Video-Bibliothek</span></button>
+        <p class="nav-label">AUTOMATISIERUNG</p>
+        <button class="nav-item" data-view="automations">⚡ <span>Automatisierungen</span><b class="pill">3</b></button>
+        <button class="nav-item" data-view="analytics">↗ <span>Statistiken</span></button>
       </nav>
       <div class="sidebar-bottom">
-        <button class="nav-item">⚙ <span>Settings</span></button>
-        <div class="usage"><div class="usage-row"><span>Monthly renders</span><strong>18 / 50</strong></div><div class="progress"><i></i></div><small>32 renders remaining</small></div>
+        <button class="nav-item">⚙ <span>Einstellungen</span></button>
+        <div class="usage"><div class="usage-row"><span>Renderings diesen Monat</span><strong>18 / 50</strong></div><div class="progress"><i></i></div><small>32 Renderings übrig</small></div>
       </div>
     </aside>
 
@@ -39,20 +39,20 @@
 
       <section id="overview" class="view active">
         <div class="page-head">
-          <div><p class="eyebrow">THURSDAY, SEPTEMBER 24</p><h1>Good morning, Luc 👋</h1><p class="muted">Your content engine is ready. Let's make something people stop scrolling for.</p></div>
-          <button class="primary" data-go="create">+ Create video</button>
+          <div><p class="eyebrow">THURSDAY, SEPTEMBER 24</p><h1>Guten Morgen, Luc 👋</h1><p class="muted">Deine Content-Engine ist bereit. Lass uns Videos bauen, bei denen man nicht weiterscrollt.</p></div>
+          <button class="primary" data-go="create">+ Video erstellen</button>
         </div>
 
         <div class="stats">
-          <div class="stat"><span>Videos this month</span><strong>18</strong><em>↑ 28%</em><small>vs. last month</small></div>
-          <div class="stat"><span>Scheduled</span><strong>7</strong><em class="blue">Next: 2h 14m</em><small>across 3 accounts</small></div>
-          <div class="stat"><span>Avg. views</span><strong>24.8K</strong><em>↑ 16%</em><small>last 10 videos</small></div>
-          <div class="stat"><span>Engagement</span><strong>8.6%</strong><em>↑ 1.2%</em><small>average rate</small></div>
+          <div class="stat"><span>Videos diesen Monat</span><strong>18</strong><em>↑ 28%</em><small>vs. last month</small></div>
+          <div class="stat"><span>Geplant</span><strong>7</strong><em class="blue">Next: 2h 14m</em><small>across 3 accounts</small></div>
+          <div class="stat"><span>Ø Aufrufe</span><strong>24.8K</strong><em>↑ 16%</em><small>last 10 videos</small></div>
+          <div class="stat"><span>Interaktionen</span><strong>8.6%</strong><em>↑ 1.2%</em><small>average rate</small></div>
         </div>
 
         <div class="grid-two">
           <div class="panel">
-            <div class="panel-head"><div><h2>Upcoming posts</h2><p>Next videos in your queue</p></div><button class="text-btn" data-go="calendar">View calendar →</button></div>
+            <div class="panel-head"><div><h2>Nächste Posts</h2><p>Nächste Videos in deiner Warteschlange</p></div><button class="text-btn" data-go="calendar">Kalender öffnen →</button></div>
             <div class="post-list">
               <article class="post"><div class="thumb purple">AI</div><div class="post-info"><strong>3 AI tools you need in 2026</strong><span>Today · 18:30 · TikTok</span></div><span class="status scheduled">Scheduled</span></article>
               <article class="post"><div class="thumb orange">5</div><div class="post-info"><strong>5 websites that feel illegal to know</strong><span>Tomorrow · 12:15 · TikTok</span></div><span class="status scheduled">Scheduled</span></article>
@@ -61,48 +61,48 @@
           </div>
 
           <div class="panel idea-panel">
-            <div class="spark">✦</div><h2>Need an idea?</h2><p>Tell AI your niche and we'll turn it into a complete short-form video.</p>
+            <div class="spark">✦</div><h2>Brauchst du eine Idee?</h2><p>Nenne deine Nische und ClipForge erstellt daraus ein Short-Konzept.</p>
             <div class="idea-input"><input id="ideaInput" placeholder="e.g. AI tools for students..." /><button id="ideaBtn">Generate</button></div>
             <div id="ideaResult" class="idea-result hidden"></div>
           </div>
         </div>
 
         <div class="panel pipeline">
-          <div class="panel-head"><div><h2>Automation pipeline</h2><p>Everything running behind the scenes</p></div><span class="live-dot">● LIVE</span></div>
+          <div class="panel-head"><div><h2>Automatisierungs-Pipeline</h2><p>Was im Hintergrund passiert</p></div><span class="live-dot">● LIVE</span></div>
           <div class="steps">
-            <div class="step done"><span>✓</span><div><strong>Find topic</strong><small>Trending AI · every 6h</small></div></div>
+            <div class="step done"><span>✓</span><div><strong>Thema finden</strong><small>Trending AI · every 6h</small></div></div>
             <div class="connector"></div>
-            <div class="step done"><span>✓</span><div><strong>Write script</strong><small>Hook + body + CTA</small></div></div>
+            <div class="step done"><span>✓</span><div><strong>Skript schreiben</strong><small>Hook + body + CTA</small></div></div>
             <div class="connector"></div>
-            <div class="step"><span>3</span><div><strong>Render video</strong><small>1080 × 1920 · captions</small></div></div>
+            <div class="step"><span>3</span><div><strong>Video rendern</strong><small>1080 × 1920 · captions</small></div></div>
             <div class="connector"></div>
-            <div class="step"><span>4</span><div><strong>Publish</strong><small>TikTok · scheduled</small></div></div>
+            <div class="step"><span>4</span><div><strong>Veröffentlichen</strong><small>TikTok · scheduled</small></div></div>
           </div>
         </div>
       </section>
 
       <section id="create" class="view">
-        <div class="page-head"><div><p class="eyebrow">VIDEO BUILDER</p><h1>Create a video</h1><p class="muted">From one idea to a ready-to-post short.</p></div></div>
+        <div class="page-head"><div><p class="eyebrow">VIDEO BUILDER</p><h1>Video erstellen</h1><p class="muted">Von einer Idee zum fertigen Short.</p></div></div>
         <div class="builder">
           <div class="panel form-panel">
-            <label>Topic or idea</label><textarea id="topic" placeholder="Write your idea...">3 AI tools every student should know</textarea>
-            <div class="form-grid"><div><label>Style</label><select><option>Fast & energetic</option><option>Clean & educational</option><option>Storytelling</option></select></div><div><label>Duration</label><select><option>30–45 sec</option><option>45–60 sec</option><option>15–30 sec</option></select></div></div>
-            <label>Voice</label><select><option>Natural male · German</option><option>Natural female · German</option><option>English · US</option></select>
-            <label>Caption style</label><div class="chips"><button class="chip selected">Bold pop</button><button class="chip">Minimal</button><button class="chip">Karaoke</button></div>
-            <button id="buildBtn" class="primary wide">✦ Generate script</button>
+            <label>Thema oder Idee</label><textarea id="topic" placeholder="Write your idea...">3 AI tools every student should know</textarea>
+            <div class="form-grid"><div><label>Stil</label><select><option>Fast & energetic</option><option>Clean & educational</option><option>Storytelling</option></select></div><div><label>Dauer</label><select><option>30–45 sec</option><option>45–60 sec</option><option>15–30 sec</option></select></div></div>
+            <label>Stimme</label><select><option>Natural male · German</option><option>Natural female · German</option><option>English · US</option></select>
+            <label>Untertitel-Stil</label><div class="chips"><button class="chip selected">Bold Pop</button><button class="chip">Minimal</button><button class="chip">Karaoke</button></div>
+            <button id="buildBtn" class="primary wide">✦ Skript generieren</button>
             <div id="buildResult" class="generated hidden"></div>
           </div>
           <div class="panel preview-panel"><div class="preview-top"><span>PREVIEW</span><span>9:16</span></div><div class="phone"><div class="phone-content"><span class="preview-tag">AI TOOLS</span><h3>3 tools that<br><b>save students</b><br>hours every week.</h3><div class="play">▶</div><small>✦ @yourhandle</small></div></div><p>Video preview will appear here after rendering.</p></div>
         </div>
       </section>
 
-      <section id="calendar" class="view"><div class="page-head"><div><p class="eyebrow">PLANNING</p><h1>Content calendar</h1><p class="muted">Your scheduled videos at a glance.</p></div><button class="primary" data-go="create">+ New video</button></div><div class="panel calendar-panel"><div class="calendar-toolbar"><button>‹</button><h2>September 2026</h2><button>›</button></div><div class="week"><b>MON</b><b>TUE</b><b>WED</b><b>THU</b><b>FRI</b><b>SAT</b><b>SUN</b></div><div class="days" id="days"></div></div></section>
+      <section id="calendar" class="view"><div class="page-head"><div><p class="eyebrow">PLANNING</p><h1>Content calendar</h1><p class="muted">Alle geplanten Videos auf einen Blick.</p></div><button class="primary" data-go="create">+ Neues Video</button></div><div class="panel calendar-panel"><div class="calendar-toolbar"><button>‹</button><h2>September 2026</h2><button>›</button></div><div class="week"><b>MON</b><b>TUE</b><b>WED</b><b>THU</b><b>FRI</b><b>SAT</b><b>SUN</b></div><div class="days" id="days"></div></div></section>
 
-      <section id="library" class="view"><div class="page-head"><div><p class="eyebrow">YOUR CONTENT</p><h1>Video library</h1><p class="muted">Drafts, renders and published videos.</p></div><button class="primary" data-go="create">+ Create video</button></div><div class="library-grid"><div class="video-card"><div class="card-thumb purple">3 AI<br>TOOLS</div><strong>3 AI tools you need in 2026</strong><small>Published · 42 sec</small></div><div class="video-card"><div class="card-thumb orange">5<br>WEBSITES</div><strong>5 websites that feel illegal to know</strong><small>Scheduled · 38 sec</small></div><div class="video-card"><div class="card-thumb green">SAVE<br>€€€</div><strong>How I save money with AI</strong><small>Draft · 41 sec</small></div><div class="video-card"><div class="card-thumb blue">AI<br>NEWS</div><strong>AI news in 30 seconds</strong><small>Published · 31 sec</small></div></div></section>
+      <section id="library" class="view"><div class="page-head"><div><p class="eyebrow">YOUR CONTENT</p><h1>Video library</h1><p class="muted">Entwürfe, Renderings und veröffentlichte Videos.</p></div><button class="primary" data-go="create">+ Create video</button></div><div class="library-grid"><div class="video-card"><div class="card-thumb purple">3 AI<br>TOOLS</div><strong>3 AI tools you need in 2026</strong><small>Published · 42 sec</small></div><div class="video-card"><div class="card-thumb orange">5<br>WEBSITES</div><strong>5 websites that feel illegal to know</strong><small>Scheduled · 38 sec</small></div><div class="video-card"><div class="card-thumb green">SAVE<br>€€€</div><strong>How I save money with AI</strong><small>Draft · 41 sec</small></div><div class="video-card"><div class="card-thumb blue">AI<br>NEWS</div><strong>AI news in 30 seconds</strong><small>Published · 31 sec</small></div></div></section>
 
-      <section id="automations" class="view"><div class="page-head"><div><p class="eyebrow">AUTOPILOT</p><h1>Automations</h1><p class="muted">Let ClipForge handle repetitive content tasks.</p></div><button class="primary">+ New automation</button></div><div class="automation-list"><div class="panel automation"><div class="auto-icon">⚡</div><div><h2>Daily AI trend hunter</h2><p>Find a trending topic → write a script → add to drafts</p><small>Runs every 6 hours</small></div><label class="switch"><input type="checkbox" checked><span></span></label></div><div class="panel automation"><div class="auto-icon">◷</div><div><h2>Evening publisher</h2><p>Publish the next approved video to TikTok at 18:30</p><small>Every day · 18:30</small></div><label class="switch"><input type="checkbox" checked><span></span></label></div><div class="panel automation"><div class="auto-icon">↗</div><div><h2>Weekly analytics</h2><p>Summarize your top videos and suggest new topics</p><small>Mondays · 09:00</small></div><label class="switch"><input type="checkbox"><span></span></label></div></div></section>
+      <section id="automations" class="view"><div class="page-head"><div><p class="eyebrow">AUTOPILOT</p><h1>Automations</h1><p class="muted">ClipForge übernimmt wiederkehrende Content-Aufgaben.</p></div><button class="primary">+ New automation</button></div><div class="automation-list"><div class="panel automation"><div class="auto-icon">⚡</div><div><h2>Daily AI trend hunter</h2><p>Find a trending topic → write a script → add to drafts</p><small>Runs every 6 hours</small></div><label class="switch"><input type="checkbox" checked><span></span></label></div><div class="panel automation"><div class="auto-icon">◷</div><div><h2>Evening publisher</h2><p>Publish the next approved video to TikTok at 18:30</p><small>Every day · 18:30</small></div><label class="switch"><input type="checkbox" checked><span></span></label></div><div class="panel automation"><div class="auto-icon">↗</div><div><h2>Weekly analytics</h2><p>Summarize your top videos and suggest new topics</p><small>Mondays · 09:00</small></div><label class="switch"><input type="checkbox"><span></span></label></div></div></section>
 
-      <section id="analytics" class="view"><div class="page-head"><div><p class="eyebrow">PERFORMANCE</p><h1>Analytics</h1><p class="muted">See what your audience actually watches.</p></div></div><div class="stats"><div class="stat"><span>Total views</span><strong>446K</strong><em>↑ 23%</em><small>last 30 days</small></div><div class="stat"><span>Likes</span><strong>31.2K</strong><em>↑ 19%</em><small>last 30 days</small></div><div class="stat"><span>Shares</span><strong>4.8K</strong><em>↑ 34%</em><small>last 30 days</small></div><div class="stat"><span>Posts</span><strong>18</strong><em>↑ 28%</em><small>last 30 days</small></div></div><div class="panel chart-panel"><div class="panel-head"><div><h2>Views over time</h2><p>Last 14 days</p></div><span class="chart-total">446K views</span></div><div class="fake-chart"><div class="line"></div><div class="chart-labels"><span>Sep 11</span><span>Sep 14</span><span>Sep 17</span><span>Sep 20</span><span>Sep 24</span></div></div></div></section>
+      <section id="analytics" class="view"><div class="page-head"><div><p class="eyebrow">PERFORMANCE</p><h1>Analytics</h1><p class="muted">Sieh, welche Inhalte deine Zuschauer wirklich ansehen.</p></div></div><div class="stats"><div class="stat"><span>Total views</span><strong>446K</strong><em>↑ 23%</em><small>last 30 days</small></div><div class="stat"><span>Likes</span><strong>31.2K</strong><em>↑ 19%</em><small>last 30 days</small></div><div class="stat"><span>Shares</span><strong>4.8K</strong><em>↑ 34%</em><small>last 30 days</small></div><div class="stat"><span>Posts</span><strong>18</strong><em>↑ 28%</em><small>last 30 days</small></div></div><div class="panel chart-panel"><div class="panel-head"><div><h2>Views over time</h2><p>Last 14 days</p></div><span class="chart-total">446K views</span></div><div class="fake-chart"><div class="line"></div><div class="chart-labels"><span>Sep 11</span><span>Sep 14</span><span>Sep 17</span><span>Sep 20</span><span>Sep 24</span></div></div></div></section>
     </main>
   </div>
   <div id="toast" class="toast"></div>
