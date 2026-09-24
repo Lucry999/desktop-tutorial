@@ -1,5 +1,5 @@
 (function(){
-  const API_BASE=(window.CLIPFORGE_API_URL||localStorage.getItem('clipforge_api_url')||'https://desktop-tutorial-bkh1.onrender.com').replace(/\/$/,'');
+  const API_BASE=(window.CLIPFORGE_API_URL||localStorage.getItem('clipforge_api_url')||'http://127.0.0.1:5577').replace(/\/$/,'');
   let lastUrl='';
 
   function escape(value){
@@ -78,7 +78,7 @@
     if(btn){btn.disabled=true;btn.textContent='⏳ KI-Videos werden erstellt…';}
 
     try{
-      const response=await fetch(API_BASE+'/api/video-hq',{
+      const response=await fetch(API_BASE+'/generate',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({title:script.topic||'ClipForge Video',scenes})
