@@ -58,6 +58,49 @@
     rounded(ctx,70,1760,940*progress,8,8);ctx.fillStyle='#a78bfa';ctx.fill();
   }
 
+  function openLibraryDb(){
+    return new Promise(function(resolve,reject){
+      var request=indexedDB.open('ClipForgeVideoDB',1);
+      request.onupgradeneeded=function(){request.result.createObjectStore('videos',{keyPath:'id'});};
+      request.onsuccess=function(){resolve(request.result);};
+      request.onerror=function(){reject(request.error);};
+    });
+  }
+
+  async function saveToLibrary(blob,title){
+    try{
+      var db=await openLibraryDb();
+      await new Promise(function(resolve,reject){
+        var tx=db.transaction('videos','readwrite');
+        tx.objectStore('videos').put({id:crypto.randomUUID(),blob:blob,title:title||'ClipForge Video',created:Date.now()});
+        tx.oncomplete=resolve;tx.onerror=function(){reject(tx.error);};
+      });
+      db.close();
+    }catch(error){console.warn('Video-Bibliothek:',error);}
+  }
+
+  async function loadLibrary(){
+    var grid=document.getElementById('libraryGrid');
+    if(!grid)return;
+    try{
+      var db=await openLibraryDb();
+      var items=await new Promise(function(resolve,reject){
+        var tx=db.transaction('videos','readonly'), req=tx.objectStore('videos').getAll();
+        req.onsuccess=function(){resolve(req.result.sort(function(a,b){return b.created-a.created;}));};
+        req.onerror=function(){reject(req.error);};
+      });
+      db.close();
+      grid.querySelectorAll('.generated-video-card').forEach(function(x){x.remove();});
+      items.forEach(function(item){
+        var url=URL.createObjectURL(item.blob);
+        var card=document.createElement('div');
+        card.className='video-card generated-video-card';
+        card.innerHTML='<div class="card-video-wrap"><video src="'+url+'" muted playsinline controls preload="metadata"></video></div><strong>'+String(item.title||'ClipForge Video').replace(/[&<>]/g,'')+'</strong><small>Gerendert · '+new Date(item.created).toLocaleDateString('de-DE')+' · <a href="'+url+'" download="clipforge-video.webm">Download</a></small>';
+        grid.prepend(card);
+      });
+    }catch(error){console.warn('Bibliothek laden:',error);}
+  }
+
   async function renderVideo(){
     var script=window.clipforgeLastScript;
     if(!script||!script.body){alert('Erst ein KI-Skript erstellen.');return;}
@@ -116,6 +159,8 @@
       hint.textContent='Fertiges 9:16-Video mit KI-Stimme und animierten Captions.';
       download.href=lastBlobUrl;download.download='clipforge-'+Date.now()+'.webm';
       localStorage.setItem('clipforge_last_video_meta',JSON.stringify({title:script.topic||'ClipForge Video',created:Date.now()}));
+      await saveToLibrary(blob,script.topic||'ClipForge Video');
+      await loadLibrary();
       var result=document.getElementById('buildResult');
       if(result)result.innerHTML+='<br><br><b>✅ Video fertig!</b> Vorschau oder Download starten.';
       if(btn)btn.textContent='🎬 Video erstellen';
@@ -132,6 +177,7 @@
   function init(){
     var btn=document.getElementById('renderVideoBtn');
     if(btn)btn.addEventListener('click',renderVideo);
+    loadLibrary();
     var newer=document.getElementById('newVideoBtn');
     if(newer)newer.addEventListener('click',function(){if(btn)btn.click();});
   }
