@@ -32,8 +32,18 @@ document.getElementById('ideaBtn').addEventListener('click', async () => {
     const response=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'idea',topic})});
     if(!response.ok) throw await apiError(response);
     const data=await response.json();
-    result.innerHTML='<b>✨ KI-Idee:</b> '+escapeHtml(data.title)+'<br><span>'+escapeHtml(data.hook)+' · '+escapeHtml(data.duration||'30–45 Sek.')+'</span>';
-    toast('KI-Idee erstellt');
+    const prompt = [
+      data.title ? 'Erstelle ein TikTok-Video zum Thema: ' + normalizeText(data.title) : '',
+      data.hook ? 'Starker Einstieg/Hook: ' + normalizeText(data.hook) : '',
+      data.duration ? 'Zieldauer: ' + normalizeText(data.duration) : 'Zieldauer: 30–45 Sekunden',
+      'Format: 9:16, schnelle und moderne TikTok-Inszenierung.',
+      'Ziel: Zuschauer in den ersten Sekunden halten und verständlich informieren.'
+    ].filter(Boolean).join('\n');
+    const topicField=document.getElementById('topic');
+    if(topicField) topicField.value=prompt;
+    result.innerHTML='<b>✨ Prompt übernommen</b><br><span>Die KI-Idee wurde direkt in den Video-Builder eingesetzt.</span>';
+    showView('create');
+    toast('KI-Prompt übernommen');
   } catch(error) {
     result.innerHTML='<b>⚠️ KI-Fehler</b><br><span>'+escapeHtml(error.message||'Backend nicht erreichbar')+'</span>';
     toast(error.message||'Backend nicht erreichbar');
