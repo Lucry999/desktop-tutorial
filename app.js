@@ -19,13 +19,13 @@ document.getElementById('ideaBtn').addEventListener('click', async () => {
   result.innerHTML='<span>⏳ KI erstellt gerade eine Idee …</span>';
   try {
     const response=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'idea',topic})});
-    if(!response.ok) throw new Error('API nicht erreichbar');
+    if(!response.ok){ const err=await response.json().catch(()=>({})); throw new Error(err.error||`API-Fehler ${response.status}`); }
     const data=await response.json();
     result.innerHTML='<b>✨ KI-Idee:</b> '+escapeHtml(data.title)+'<br><span>'+escapeHtml(data.hook)+' · '+escapeHtml(data.duration||'30–45 Sek.')+'</span>';
     toast('KI-Idee erstellt');
   } catch(error) {
-    result.innerHTML='<b>⚠️ KI noch nicht verbunden</b><br><span>Starte den lokalen Server und hinterlege OPENAI_API_KEY.</span>';
-    toast('Backend nicht erreichbar');
+    result.innerHTML='<b>⚠️ KI-Fehler</b><br><span>'+escapeHtml(error.message||'Backend nicht erreichbar')+'</span>';
+    toast(error.message||'Backend nicht erreichbar');
   }
 });
 
