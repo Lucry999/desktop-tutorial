@@ -87,3 +87,21 @@ document.querySelectorAll('.primary').forEach(button=>{
     }
   });
 });
+
+
+// Live backend status
+async function checkApiStatus(){
+  const el=document.getElementById('apiStatus');
+  if(!el) return;
+  try{
+    const response=await fetch(`${API_BASE}/health`,{cache:'no-store'});
+    if(!response.ok) throw new Error('offline');
+    el.className='api-status online';
+    el.innerHTML='<span></span> KI verbunden';
+  }catch{
+    el.className='api-status offline';
+    el.innerHTML='<span></span> KI offline';
+  }
+}
+checkApiStatus();
+setInterval(checkApiStatus,30000);
