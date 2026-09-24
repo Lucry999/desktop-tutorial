@@ -1,3 +1,6 @@
+const API_BASE = (window.CLIPFORGE_API_URL || localStorage.getItem('clipforge_api_url') || '').replace(/\/$/,'');
+const API_ENDPOINT = `${API_BASE}/api/generate`;
+
 const views=[...document.querySelectorAll('.view')];
 const nav=[...document.querySelectorAll('.nav-item[data-view]')];
 function showView(id){views.forEach(v=>v.classList.toggle('active',v.id===id));nav.forEach(n=>n.classList.toggle('active',n.dataset.view===id));window.scrollTo({top:0,behavior:'smooth'});}
@@ -15,7 +18,7 @@ document.getElementById('ideaBtn').addEventListener('click', async () => {
   result.classList.remove('hidden');
   result.innerHTML='<span>⏳ KI erstellt gerade eine Idee …</span>';
   try {
-    const response=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'idea',topic})});
+    const response=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'idea',topic})});
     if(!response.ok) throw new Error('API nicht erreichbar');
     const data=await response.json();
     result.innerHTML='<b>✨ KI-Idee:</b> '+escapeHtml(data.title)+'<br><span>'+escapeHtml(data.hook)+' · '+escapeHtml(data.duration||'30–45 Sek.')+'</span>';
@@ -32,7 +35,7 @@ document.getElementById('buildBtn').addEventListener('click', async () => {
   result.classList.remove('hidden');
   result.innerHTML='<span>⏳ KI schreibt dein Skript …</span>';
   try {
-    const response=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'script',topic,style:document.querySelector('.form-panel select')?.value||'Fast & energetic'})});
+    const response=await fetch(API_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'script',topic,style:document.querySelector('.form-panel select')?.value||'Fast & energetic'})});
     if(!response.ok) throw new Error('API nicht erreichbar');
     const data=await response.json();
     result.innerHTML='<b>HOOK</b><br>'+escapeHtml(data.hook)+'<br><br><b>BODY</b><br>'+escapeHtml(data.body).replace(/\n/g,'<br>')+'<br><br><b>CTA</b><br>'+escapeHtml(data.cta);
