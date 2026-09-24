@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express from 'express';
-import OpenAI from 'openai';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,15 +25,13 @@ app.use(express.static(__dirname));
 app.get('/health',(req,res)=>res.json({ok:true,service:'ClipForge AI',version:'1.1.0',time:new Date().toISOString()}));
 
 app.post('/api/generate', async (req,res) => {
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(503).json({error:'OPENAI_API_KEY fehlt'});
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(503).json({error:'GEMINI_API_KEY fehlt'});
   }
 
   const {type='script', topic='', style='Fast & energetic'} = req.body || {};
   const cleanTopic = String(topic).trim().slice(0,500);
   if (!cleanTopic) return res.status(400).json({error:'Thema fehlt'});
-
-  const client = new OpenAI({apiKey:process.env.OPENAI_API_KEY});
 
   try {
     if (type === 'idea') {
