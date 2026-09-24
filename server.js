@@ -45,6 +45,161 @@ app.get('/health',(req,res) => res.json({
   version:'1.3.0'
 }));
 
+const fs = await import('node:fs/promises');
+const os = await import('node:os');
+const crypto = await import('node:crypto');
+const { default: ffmpegPath } = await import('ffmpeg-static');
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+const execFileAsync = promisify(execFile);
+
+const videoJobs = new Map();
+
+async function runwayRequest(url, options) {
+  if (!process.env.RUNWAYML_API_SECRET) throw new Error('RUNWAYML_API_SECRET fehlt in Render');
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + process.env.RUNWAYML_API_SECRET,
+      'X-Runway-Version': '2024-11-06',
+      ...(options?.headers || {})
+    }
+  });
+  const raw = await response.text();
+  let data = {};
+  try { data = JSON.parse(raw); } catch { data = { raw }; }
+  if (!response.ok) {
+    const message = data?.error || data?.message || data?.details || ('Runway API HTTP ' + response.status);
+    throw new Error(String(message));
+  }
+  return data;
+}
+
+async function runRunwayClip(prompt) {
+  const task = await runwayRequest('https://api.dev.runwayml.com/v1/image_to_video', {
+    method:'POST',
+    body:JSON.stringify({
+      model:'gen4.5',
+      promptText:prompt,
+      ratio:'720:1280',
+      duration:10
+    })
+  });
+  const taskId=task.id;
+  if(!taskId) throw new Error('Runway hat keine Task-ID zurückgegeben');
+  for(let attempt=0;attempt<48;attempt++){
+    await new Promise(resolve=>setTimeout(resolve,5000 + Math.random()*1500));
+    const status=await runwayRequest('https://api.dev.runwayml.com/v1/tasks/'+encodeURIComponent(taskId), {method:'GET'});
+    if(status.status==='SUCCEEDED' && status.output?.[0]) return status.output[0];
+    if(status.status==='FAILED' || status.status==='CANCELED') throw new Error('Runway konnte eine Videoszene nicht erstellen');
+  }
+  throw new Error('Runway-Video braucht länger als erwartet');
+}
+
+async function generateMistralSpeech(text) {
+  const clean=String(text||'').replace(/[*_~#`]/g,'').replace(/\[[^\]]*\]/g,'').replace(/\\/g,'').replace(/\bKI\b/gi,'künstliche Intelligenz').replace(/\bAI\b/gi,'A I').replace(/\s+/g,' ').trim().slice(0,1800);
+  if(!clean) throw new Error('Kein Sprechertext vorhanden');
+  const voices=await mistralJson('https://api.mistral.ai/v1/audio/voices?type=preset&limit=100',{headers:{'Authorization':'Bearer '+process.env.MISTRAL_API_KEY}});
+  const presets=Array.isArray(voices.items)?voices.items:[];
+  const german=presets.find(v=>Array.isArray(v.languages)&&v.languages.some(lang=>{const x=String(lang).toLowerCase();return x.startsWith('de')||x.includes('german')||x.includes('deutsch');}));
+  const voiceId=String(german?.id||presets[0]?.id||'');
+  if(!voiceId) throw new Error('Keine Mistral-Preset-Stimme verfügbar');
+  const data=await mistralJson('https://api.mistral.ai/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+process.env.MISTRAL_API_KEY},body:JSON.stringify({model:'voxtral-mini-tts-2603',input:clean,voice_id:voiceId,response_format:'mp3'})});
+  if(!data.audio_data) throw new Error('Mistral hat keine Audiodaten zurückgegeben');
+  return Buffer.from(data.audio_data,'base64');
+}
+
+function srtTime(seconds){
+  const ms=Math.max(0,Math.round(seconds*1000));
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000),rest=ms%1000;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+','+String(rest).padStart(3,'0');
+}
+
+function makeSrt(scenes){
+  const weights=scenes.map(s=>Math.max(1,cleanSceneText(s.narration).split(/\s+/).length));
+  const total=weights.reduce((a,b)=>a+b,0)||1;
+  let t=0;
+  return scenes.map((s,i)=>{
+    const d=30*weights[i]/total;
+    const line=cleanSceneText(s.on_screen||s.narration).replace(/-->/g,'-');
+    const out=(i+1)+'\n'+srtTime(t)+' --> '+srtTime(t+d)+'\n'+line+'\n\n';
+    t+=d;return out;
+  }).join('');
+}
+
+function cleanSceneText(value){ return String(value||'').replace(/[*_~#`]/g,'').replace(/\[[^\]]*\]/g,'').replace(/\s+/g,' ').trim(); }
+
+async function assembleVideo(jobId, scenes, title){
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'clipforge-'+jobId+'-'));
+  const clips=[];
+  try{
+    const style='Vertical nine-by-sixteen TikTok video, premium cinematic commercial look, realistic photography, natural skin and materials, strong depth of field, smooth handheld or dolly camera motion, clean modern lighting, no text, no subtitles, no logos, no watermark, visually coherent color grade.';
+    for(let i=0;i<scenes.length;i++){
+      videoJobs.get(jobId).progress=10 + Math.round((i/scenes.length)*45);
+      const scene=scenes[i];
+      const prompt=style+' Scene '+(i+1)+': '+cleanSceneText(scene.visual||scene.narration)+'. '+cleanSceneText(scene.narration)+'. Show a clear visual that supports the narration; do not depict written words on screen.';
+      const url=await runRunwayClip(prompt);
+      const file=path.join(dir,'scene-'+i+'.mp4');
+      const response=await fetch(url);
+      if(!response.ok) throw new Error('Runway-Videodatei konnte nicht geladen werden');
+      await fs.writeFile(file,Buffer.from(await response.arrayBuffer()));
+      clips.push(file);
+    }
+
+    videoJobs.get(jobId).progress=58;
+    const listFile=path.join(dir,'list.txt');
+    await fs.writeFile(listFile,clips.map(file=>"file '"+file.replace(/'/g,"'\\''")+"'").join('\n'));
+    const silent=path.join(dir,'silent.mp4');
+    await execFileAsync(ffmpegPath,['-y','-f','concat','-safe','0','-i',listFile,'-c','copy',silent]);
+
+    videoJobs.get(jobId).progress=72;
+    const narration=scenes.map(s=>cleanSceneText(s.narration)).filter(Boolean).join(' ');
+    const audio=await generateMistralSpeech(narration);
+    const audioFile=path.join(dir,'voice.mp3');
+    await fs.writeFile(audioFile,audio);
+
+    const srtFile=path.join(dir,'captions.srt');
+    await fs.writeFile(srtFile,makeSrt(scenes));
+    const outputDir=path.join(__dirname,'generated');
+    await fs.mkdir(outputDir,{recursive:true});
+    const outputFile=path.join(outputDir,jobId+'.mp4');
+    videoJobs.get(jobId).progress=84;
+    const subtitleFilter='subtitles='+srtFile.replace(/\\/g,'/').replace(/:/g,'\\:')+':force_style=FontName=Arial,FontSize=20,PrimaryColour=&H00FFFFFF&,OutlineColour=&H80000000&,BorderStyle=3,Alignment=2,MarginV=120';
+    await execFileAsync(ffmpegPath,['-y','-i',silent,'-i',audioFile,'-vf',subtitleFilter,'-map','0:v:0','-map','1:a:0','-c:v','libx264','-preset','veryfast','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-shortest',outputFile],{maxBuffer:1024*1024*10});
+    videoJobs.get(jobId).progress=100;
+    videoJobs.get(jobId).status='done';
+    videoJobs.get(jobId).url='/generated/'+jobId+'.mp4';
+    videoJobs.get(jobId).title=title||'ClipForge Video';
+  }catch(error){
+    videoJobs.get(jobId).status='error';
+    videoJobs.get(jobId).error=error.message||'Videoerstellung fehlgeschlagen';
+    console.error('HQ video job error:',error);
+  }finally{
+    await fs.rm(dir,{recursive:true,force:true}).catch(()=>{});
+  }
+}
+
+app.post('/api/video-hq', async (req,res)=>{
+  if(!process.env.RUNWAYML_API_SECRET) return res.status(503).json({error:'RUNWAYML_API_SECRET fehlt in Render'});
+  if(!process.env.MISTRAL_API_KEY) return res.status(503).json({error:'MISTRAL_API_KEY fehlt in Render'});
+  const scenes=Array.isArray(req.body?.scenes)?req.body.scenes.slice(0,6).map(s=>({narration:cleanSceneText(s.narration),on_screen:cleanSceneText(s.on_screen),visual:cleanSceneText(s.visual)})).filter(s=>s.narration):[];
+  const title=String(req.body?.title||'ClipForge Video').slice(0,160);
+  if(scenes.length<3) return res.status(400).json({error:'Für ein Qualitätsvideo werden mindestens 3 Szenen benötigt'});
+  const jobId=crypto.randomUUID();
+  videoJobs.set(jobId,{status:'processing',progress:0});
+  assembleVideo(jobId,scenes,title);
+  res.status(202).json({jobId});
+});
+
+app.get('/api/video-hq/:id',(req,res)=>{
+  const job=videoJobs.get(req.params.id);
+  if(!job) return res.status(404).json({error:'Renderjob nicht gefunden'});
+  res.json(job);
+});
+
+app.use('/generated',express.static(path.join(__dirname,'generated'),{maxAge:'1h'}));
+
 app.post('/api/generate', async (req,res) => {
   if (!process.env.MISTRAL_API_KEY) return res.status(503).json({error:'MISTRAL_API_KEY fehlt in Render'});
   const type = String(req.body?.type || 'script');
