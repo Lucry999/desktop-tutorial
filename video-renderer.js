@@ -103,7 +103,11 @@
 
   async function renderVideo(){
     var script=window.clipforgeLastScript;
-    if(!script||!script.body){alert('Erst ein KI-Skript erstellen.');return;}
+    if(!script||!script.body){
+      var result=document.getElementById('buildResult');
+      if(result){result.classList.remove('hidden');result.innerHTML='<b>⚠️ Kein Skript vorhanden</b><br><span>Erstelle zuerst ein KI-Skript.</span>';}
+      return;
+    }
     var btn=document.getElementById('renderVideoBtn'), wrap=document.getElementById('videoPreviewWrap');
     var video=document.getElementById('videoPreview'), download=document.getElementById('downloadVideoBtn');
     var demo=document.getElementById('demoPhone'), hint=document.getElementById('previewHint');
@@ -175,6 +179,10 @@
   }
 
   function init(){
+    try{
+      var saved=localStorage.getItem('clipforge_last_script');
+      if(saved && !window.clipforgeLastScript) window.clipforgeLastScript=JSON.parse(saved);
+    }catch(error){ console.warn('Gespeichertes Skript konnte nicht geladen werden',error); }
     var btn=document.getElementById('renderVideoBtn');
     if(btn)btn.addEventListener('click',renderVideo);
     loadLibrary();
