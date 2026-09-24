@@ -1,4 +1,4 @@
-const API_BASE = (window.CLIPFORGE_API_URL || localStorage.getItem('clipforge_api_url') || '').replace(/\/$/,'');
+const API_BASE = (window.CLIPFORGE_API_URL || localStorage.getItem('clipforge_api_url') || 'https://desktop-tutorial-bkh1.onrender.com').replace(/\/$/,'');
 const API_ENDPOINT = `${API_BASE}/api/generate`;
 
 const views=[...document.querySelectorAll('.view')];
