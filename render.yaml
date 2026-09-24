@@ -6,7 +6,7 @@ services:
     buildCommand: npm install
     startCommand: npm start
     envVars:
-      - key: OPENAI_API_KEY
+      - key: GEMINI_API_KEY
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
