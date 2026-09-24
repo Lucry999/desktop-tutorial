@@ -62,6 +62,9 @@ document.getElementById('buildBtn').addEventListener('click', async () => {
     const hook=normalizeText(data.hook);
     const body=normalizeText(data.body);
     const cta=normalizeText(data.cta);
+    window.clipforgeLastScript={hook,body,cta,topic};
+    localStorage.setItem('clipforge_last_script',JSON.stringify(window.clipforgeLastScript));
+    document.getElementById('videoActions')?.classList.remove('hidden');
     result.innerHTML='<b>HOOK</b><br>'+escapeHtml(hook)+'<br><br><b>BODY</b><br>'+escapeHtml(body).replace(/\n/g,'<br>')+'<br><br><b>CTA</b><br>'+escapeHtml(cta);
     toast('KI-Skript erstellt');
   } catch(error) {
