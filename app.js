@@ -41,8 +41,8 @@ document.getElementById('buildBtn').addEventListener('click', async () => {
     result.innerHTML='<b>HOOK</b><br>'+escapeHtml(data.hook)+'<br><br><b>BODY</b><br>'+escapeHtml(data.body).replace(/\n/g,'<br>')+'<br><br><b>CTA</b><br>'+escapeHtml(data.cta);
     toast('KI-Skript erstellt');
   } catch(error) {
-    result.innerHTML='<b>⚠️ KI noch nicht verbunden</b><br><span>Starte den lokalen Server und hinterlege OPENAI_API_KEY.</span>';
-    toast('Backend nicht erreichbar');
+    result.innerHTML='<b>⚠️ KI-Fehler</b><br><span>'+escapeHtml(error.message||'Backend nicht erreichbar')+'</span>';
+    toast(error.message||'Backend nicht erreichbar');
   }
 });
 
