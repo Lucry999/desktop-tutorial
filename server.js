@@ -42,6 +42,7 @@ app.get('/health',(req,res) => res.json({
   service:'ClipForge AI',
   provider:'mistral',
   configured:Boolean(process.env.MISTRAL_API_KEY),
+  videoConfigured:Boolean(process.env.RUNWAYML_API_SECRET),
   version:'1.3.0'
 }));
 
