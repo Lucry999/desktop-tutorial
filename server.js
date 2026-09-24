@@ -83,7 +83,7 @@ async function runRunwayClip(prompt) {
       model:'gen4.5',
       promptText:prompt,
       ratio:'720:1280',
-      duration:10
+      duration:6
     })
   });
   const taskId=task.id;
