@@ -78,6 +78,65 @@ async function mistralChat(messages) {
   throw new Error('Mistral-Anfrage konnte nicht abgeschlossen werden');
 }
 
+async function mistralFetchJson(url, options) {
+  const response = await fetch(url, options);
+  const raw = await response.text();
+  let data;
+  try { data = JSON.parse(raw); } catch { data = { raw }; }
+  if (!response.ok) {
+    const message = data?.message || data?.error?.message || data?.error || ('Mistral API HTTP ' + response.status);
+    throw new Error(String(message));
+  }
+  return data;
+}
+
+app.get('/api/voices', async (req, res) => {
+  if (!process.env.MISTRAL_API_KEY) return res.status(503).json({ error: 'MISTRAL_API_KEY fehlt in Render' });
+  try {
+    const data = await mistralFetchJson('https://api.mistral.ai/v1/audio/voices?type=preset&limit=100', {
+      headers: { 'Authorization': 'Bearer ' + process.env.MISTRAL_API_KEY }
+    });
+    const voices = (data.items || []).map(v => ({ id: v.id, name: v.name, type: v.type, languages: v.languages || [] }));
+    res.json({ voices });
+  } catch (error) {
+    console.error('Voice list error:', error);
+    res.status(502).json({ error: error.message || 'Stimmen konnten nicht geladen werden' });
+  }
+});
+
+app.post('/api/tts', async (req, res) => {
+  if (!process.env.MISTRAL_API_KEY) return res.status(503).json({ error: 'MISTRAL_API_KEY fehlt in Render' });
+  const cleanText = String(req.body?.text || '')
+    .replace(/[*_`#]/g, '')
+    .replace(/[^\\S\\r\\n]+/g, ' ')
+    .trim()
+    .slice(0, 1800);
+  if (!cleanText) return res.status(400).json({ error: 'Text für Stimme fehlt' });
+  try {
+    let voiceId = String(req.body?.voice_id || '').trim();
+    if (!voiceId) {
+      const voices = await mistralFetchJson('https://api.mistral.ai/v1/audio/voices?type=preset&limit=100', {
+        headers: { 'Authorization': 'Bearer ' + process.env.MISTRAL_API_KEY }
+      });
+      const presets = voices.items || [];
+      const german = presets.find(v => Array.isArray(v.languages) && v.languages.some(lang => String(lang).toLowerCase().startsWith('de')));
+      voiceId = german?.id || presets[0]?.id || '';
+    }
+    if (!voiceId) throw new Error('Keine Mistral-Preset-Stimme verfügbar');
+    const data = await mistralFetchJson('https://api.mistral.ai/v1/audio/speech', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.MISTRAL_API_KEY },
+      body: JSON.stringify({ model: 'voxtral-mini-tts-2603', input: cleanText, voice_id: voiceId, response_format: 'mp3' })
+    });
+    const audioData = data?.audio_data;
+    if (!audioData) throw new Error('Mistral hat keine Audiodaten zurückgegeben');
+    res.json({ audio: 'data:audio/mpeg;base64,' + audioData, voice_id: voiceId });
+  } catch (error) {
+    console.error('TTS error:', error);
+    res.status(502).json({ error: error.message || 'Sprachgenerierung fehlgeschlagen' });
+  }
+});
+
 app.post('/api/generate', async (req, res) => {
   if (!process.env.MISTRAL_API_KEY) {
     return res.status(503).json({ error: 'MISTRAL_API_KEY fehlt in Render' });
