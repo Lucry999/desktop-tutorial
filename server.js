@@ -25,8 +25,8 @@ app.use(express.static(__dirname));
 app.get('/health',(req,res)=>res.json({ok:true,service:'ClipForge AI',version:'1.1.0',time:new Date().toISOString()}));
 
 app.post('/api/generate', async (req,res) => {
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(503).json({error:'GEMINI_API_KEY fehlt'});
+  if (!process.env.MISTRAL_API_KEY) {
+    return res.status(503).json({error:'MISTRAL_API_KEY fehlt'});
   }
 
   const {type='script', topic='', style='Fast & energetic'} = req.body || {};
