@@ -36,3 +36,21 @@ Keep API keys in server-side environment variables. Never put provider secrets i
 ## Important
 
 Use official TikTok APIs and follow TikTok's current developer, content, automation and age requirements. This project does not attempt to bypass platform restrictions.
+
+
+## Echte KI-Funktion
+
+Die Website kann jetzt über einen kleinen Node.js-Server die OpenAI Responses API verwenden. Der API-Schlüssel bleibt dabei auf dem Server und wird nicht in `index.html` oder `app.js` gespeichert.
+
+### Lokal starten
+
+1. Node.js installieren.
+2. Repository herunterladen.
+3. Im Projektordner ein Terminal öffnen.
+4. `npm install`
+5. `.env.example` zu `.env` kopieren.
+6. In `.env` den eigenen `OPENAI_API_KEY` eintragen.
+7. `npm start`
+8. `http://localhost:3000` öffnen.
+
+GitHub Pages kann nur die statische Oberfläche ausliefern; den Node.js-Server führt GitHub Pages nicht aus. Für die öffentlich erreichbare Version braucht ClipForge deshalb später ein separates Backend/Hosting. API-Schlüssel niemals ins Frontend committen.
